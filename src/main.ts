@@ -164,14 +164,17 @@ function config(config: ConfigurationOptions) {
 async function bind(
   app: core.Express,
   server: http.Server | https.Server,
-  callback?: () => void
+  callback?: () => void,
+  shouldInjectViteIndexMiddleware = true
 ) {
   info(`Running in ${pc.yellow(Config.mode)} mode`);
 
   if (Config.mode === "development") {
     const vite = await startServer(server);
     await injectStaticMiddleware(app, vite.middlewares);
-    await injectViteIndexMiddleware(app, vite);
+    if (shouldInjectViteIndexMiddleware) {
+      await injectViteIndexMiddleware(app, vite);
+    }
   } else {
     if (isRunningViteless()) {
       info(
@@ -186,8 +189,8 @@ async function bind(
   callback?.();
 }
 
-function listen(app: core.Express, port: number, callback?: () => void) {
-  const server = app.listen(port, () => bind(app, server, callback));
+function listen(app: core.Express, port: number, callback?: () => void, shouldInjectViteIndexMiddleware = true) {
+  const server = app.listen(port, () => bind(app, server, callback, shouldInjectViteIndexMiddleware));
   return server;
 }
 
