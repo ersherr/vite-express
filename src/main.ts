@@ -41,15 +41,15 @@ function isStaticFilePath(path: string) {
 }
 
 function isAPIPath(path: string) {
-  return path.match(/^\/api/);
+  return path.includes("api");
 }
 
 function isManagerPath(path: string) {
-  return path.match(/^\/manager/);
+  return path.includes("manager");
 }
 
 function isTrackerPath(path: string) {
-  return path.match(/^\/tracker/);
+  return path.includes("tracker");
 }
 
 function getTransformedHTML(html: string, req: express.Request) {
@@ -135,9 +135,11 @@ async function injectViteIndexMiddleware(
       isStaticFilePath(req.path) ||
       isAPIPath(req.path) ||
       isTrackerPath(req.path)
-    )
+    ) {
+      console.log("isStaticFilePath || isAPIPath || isTrackerPath");
       next();
-    else {
+    } else {
+      console.log("not isStaticFilePath || isAPIPath || isTrackerPath");
       const html = await server.transformIndexHtml(req.originalUrl, template);
       res.send(getTransformedHTML(html, req));
     }
