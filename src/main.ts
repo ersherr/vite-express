@@ -40,6 +40,18 @@ function isStaticFilePath(path: string) {
   return path.match(/(\.\w+$)|@vite|@id|@react-refresh/);
 }
 
+function isAPIPath(path: string) {
+  return path.match(/^\/api/);
+}
+
+function isManagerPath(path: string) {
+  return path.match(/^\/manager/);
+}
+
+function isTrackerPath(path: string) {
+  return path.match(/^\/tracker/);
+}
+
 function getTransformedHTML(html: string, req: express.Request) {
   return Config.transformer ? Config.transformer(html, req) : html;
 }
@@ -119,7 +131,12 @@ async function injectViteIndexMiddleware(
       "utf8"
     );
 
-    if (isStaticFilePath(req.path)) next();
+    if (
+      isStaticFilePath(req.path) ||
+      isAPIPath(req.path) ||
+      isTrackerPath(req.path)
+    )
+      next();
     else {
       const html = await server.transformIndexHtml(req.originalUrl, template);
       res.send(getTransformedHTML(html, req));
@@ -189,8 +206,15 @@ async function bind(
   callback?.();
 }
 
-function listen(app: core.Express, port: number, callback?: () => void, shouldInjectViteIndexMiddleware = true) {
-  const server = app.listen(port, () => bind(app, server, callback, shouldInjectViteIndexMiddleware));
+function listen(
+  app: core.Express,
+  port: number,
+  callback?: () => void,
+  shouldInjectViteIndexMiddleware = true
+) {
+  const server = app.listen(port, () =>
+    bind(app, server, callback, shouldInjectViteIndexMiddleware)
+  );
   return server;
 }
 
